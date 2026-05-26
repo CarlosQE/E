@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>⚡ ElectroTrivia — Seguridad Eléctrica INSEIN</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050c1a; --bg2:#0a1628; --card:#0e1c32; --card2:#152238;
+  --el:#00d4ff; --eg:rgba(0,212,255,.22); --gold:#ffd700; --gg:rgba(255,215,0,.22);
+  --danger:#ff3344; --ok:#00e676; --text:#dde8ff; --dim:#5a7a9a; --bdr:rgba(0,212,255,.12);
+  --c0:#ffd700; --c1:#00c8ff; --c2:#ff4444; --c3:#00e676; --c4:#ff8800; --c5:#bb86fc;
+}
+*{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); }
+body{ color:var(--text); font-family:'Rajdhani',sans-serif; display:flex; align-items:center; justify-content:center; }
+#bg{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+#flash{ position:fixed; inset:0; z-index:100; pointer-events:none; opacity:0; }
+#app{ position:relative; z-index:1; width:100%; max-width:460px; height:100vh; height:100dvh; overflow:hidden; }
+
+/* ── SCREENS ── */
+.scr{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center;
+  padding:14px 16px 12px;
+  opacity:0; pointer-events:none;
+  transition:opacity .3s ease, transform .3s ease;
+  transform:translateY(10px);
+  overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+.scr.on{ opacity:1; pointer-events:all; transform:translateY(0); }
+
+/* ── TYPOGRAPHY ── */
+.h1{
+  font-family:'Orbitron',monospace; font-weight:900; letter-spacing:3px;
+  line-height:1.05; text-align:center;
+  font-size:clamp(1.7rem,7vw,2.3rem);
+  background:linear-gradient(135deg,var(--gold) 30%,var(--el));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.sub{ font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:4px; color:var(--el); text-transform:uppercase; opacity:.75; text-align:center; }
+.mono{ font-family:'Share Tech Mono',monospace; }
+
+/* ── BUTTONS ── */
+.btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:13px 18px; border:none; border-radius:13px;
+  font-family:'Rajdhani',sans-serif; font-size:.98rem; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase; cursor:pointer;
+  transition:transform .15s,box-shadow .15s; width:100%;
+  min-height:44px; flex-shrink:0;
+}
+.btn:active{ transform:scale(.96); }
+.btn-el{ background:linear-gradient(135deg,var(--el),#0099bb); color:#000; box-shadow:0 0 20px var(--eg),0 4px 12px rgba(0,0,0,.4); }
+.btn-el:hover{ box-shadow:0 0 36px var(--eg),0 4px 12px rgba(0,0,0,.4); }
+.btn-gd{ background:linear-gradient(135deg,var(--gold),#c8900a); color:#000; box-shadow:0 0 20px var(--gg); font-size:1.08rem; padding:15px 18px; }
+.btn-gd:hover{ box-shadow:0 0 38px var(--gg); }
+.btn-ghost{ background:transparent; color:var(--dim); border:1px solid var(--bdr); font-size:.88rem; }
+.btn-ghost:hover{ color:var(--el); border-color:var(--el); }
+.btn-warn{ background:transparent; color:#ff8800; border:1px solid rgba(255,136,0,.3); font-size:.82rem; }
+.btn-warn:hover{ border-color:#ff8800; }
+.btn:disabled{ opacity:.42; pointer-events:none; }
+
+/* ── CARD ── */
+.card{
+  width:100%; background:var(--card); border:1px solid var(--bdr);
+  border-radius:14px; padding:14px; position:relative; overflow:hidden;
+}
+.card::before{ content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--el),transparent); }
+
+/* ── DIVIDER ── */
+.div{ display:flex; align-items:center; gap:10px; width:100%; color:var(--dim); font-size:.85rem; }
+.div::before,.div::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--bdr),transparent); }
+
+/* ── GAPS ── */
+.g4{height:4px;flex-shrink:0} .g8{height:8px;flex-shrink:0} .g10{height:10px;flex-shrink:0}
+.g12{height:12px;flex-shrink:0} .g16{height:16px;flex-shrink:0} .g20{height:20px;flex-shrink:0}
+.g24{height:24px;flex-shrink:0} .sp{flex:1;min-height:8px}
+
+/* ══════════ WELCOME ══════════ */
+#w{ justify-content:center; gap:16px; text-align:center; }
+.logo{ font-size:4.5rem; flex-shrink:0; animation:glo 2.5s ease-in-out infinite; }
+@keyframes glo{ 0%,100%{ filter:drop-shadow(0 0 16px rgba(255,215,0,.5)); } 50%{ filter:drop-shadow(0 0 46px rgba(255,215,0,1)); } }
+.w-desc{ font-size:.9rem; line-height:1.72; color:var(--dim); max-width:310px; margin:0 auto; }
+.badge{ font-size:.6rem; letter-spacing:3px; color:var(--dim); text-transform:uppercase; padding:6px 14px; border:1px solid var(--bdr); border-radius:100px; flex-shrink:0; }
+
+/* ══════════ SETUP ══════════ */
+#s{ gap:10px; padding-top:30px; justify-content:flex-start; }
+.sh{ font-family:'Orbitron',monospace; font-size:.95rem; font-weight:700; color:var(--el); }
+.cnt-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%; }
+.cnt-btn{ padding:12px 8px; background:var(--card); border:1px solid var(--bdr); border-radius:11px; color:var(--text); font-family:'Orbitron',monospace; font-size:1.2rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.cnt-btn.sel{ border-color:var(--el); background:rgba(0,212,255,.1); color:var(--el); box-shadow:0 0 12px var(--eg); }
+.p-inputs{ display:flex; flex-direction:column; gap:8px; width:100%; }
+.p-row{ display:flex; align-items:center; gap:9px; padding:10px 13px; background:var(--card); border:1px solid var(--bdr); border-radius:11px; transition:border-color .2s; }
+.p-row:focus-within{ border-color:var(--el); }
+.p-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.p-ico{ font-size:1.15rem; flex-shrink:0; }
+.p-inp{ background:none; border:none; outline:none; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:.98rem; font-weight:600; width:100%; }
+.p-inp::placeholder{ color:var(--dim); }
+.seen-info{ display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(0,230,118,.07); border:1px solid rgba(0,230,118,.2); border-radius:10px; font-size:.8rem; color:var(--ok); font-weight:600; width:100%; }
+.seen-info.warn{ background:rgba(255,136,0,.07); border-color:rgba(255,136,0,.25); color:#ff8800; }
+.seen-info.reset{ background:rgba(0,212,255,.07); border-color:rgba(0,212,255,.2); color:var(--el); }
+
+/* ══════════ WHEEL ══════════ */
+#wh{ gap:8px; padding:10px 16px; justify-content:flex-start; }
+.sb{ display:flex; gap:6px; width:100%; justify-content:center; flex-wrap:wrap; flex-shrink:0; }
+.schip{ display:flex; flex-direction:column; align-items:center; padding:6px 10px; background:var(--card); border:1px solid var(--bdr); border-radius:10px; min-width:62px; transition:all .3s; }
+.schip.act{ border-color:var(--gold); background:rgba(255,215,0,.07); box-shadow:0 0 12px var(--gg); }
+.sn{ font-size:.6rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70px; }
+.schip.act .sn{ color:var(--gold); }
+.sp2{ font-family:'Share Tech Mono',monospace; font-size:1.25rem; font-weight:700; color:var(--text); }
+.schip.act .sp2{ color:var(--gold); }
+.turn{ font-family:'Orbitron',monospace; font-size:.8rem; font-weight:700; color:var(--gold); letter-spacing:2px; text-transform:uppercase; text-align:center; flex-shrink:0; }
+.wwrap{ position:relative; width:min(255px,70vw,52vh); height:min(255px,70vw,52vh); flex-shrink:0; }
+#wc{ width:100%; height:100%; }
+.ptr{ position:absolute; top:-5px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:11px solid transparent; border-right:11px solid transparent; border-top:22px solid var(--gold); filter:drop-shadow(0 0 8px rgba(255,215,0,.9)); z-index:2; }
+.rctr{ font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--dim); letter-spacing:2px; flex-shrink:0; }
+/* Category legend */
+.cleg{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; width:100%; flex-shrink:0; }
+.cl-chip{ display:flex; align-items:center; gap:4px; padding:4px 7px; border-radius:7px; font-size:.7rem; font-weight:700; border:1px solid transparent; }
+
+/* ══════════ QUESTION ══════════ */
+#q{ gap:10px; padding:12px 16px; justify-content:flex-start; }
+/* Category banner — always visible, adapts to content */
+.cban{ display:flex; align-items:center; gap:8px; padding:8px 13px; border-radius:11px; width:100%; border:1px solid currentColor; flex-shrink:0; min-height:40px; }
+.cico{ font-size:1.2rem; flex-shrink:0; line-height:1; }
+.cname{ font-family:'Orbitron',monospace; font-size:.75rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; word-break:break-word; }
+/* Meta row: player + timer */
+.qmeta{ display:flex; align-items:center; justify-content:space-between; width:100%; flex-shrink:0; gap:8px; }
+.qplayer{ font-size:.8rem; font-weight:700; color:var(--dim); letter-spacing:1px; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; }
+/* Timer ring */
+.tring{ position:relative; width:54px; height:54px; flex-shrink:0; }
+.tring svg{ transform:rotate(-90deg); display:block; }
+.tring circle{ fill:none; stroke-width:4; stroke-linecap:round; }
+.tbg{ stroke:rgba(255,255,255,.06); }
+.tprog{ stroke:var(--el); stroke-dasharray:157.08; stroke-dashoffset:0; transition:stroke-dashoffset .15s linear, stroke .3s; }
+.tval{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Share Tech Mono',monospace; font-size:.9rem; font-weight:700; }
+/* Question text — adapts to any length */
+.qtxt{
+  width:100%; font-size:1.05rem; font-weight:600; line-height:1.55;
+  color:var(--text); padding:13px 14px;
+  background:var(--card); border-radius:12px; border:1px solid var(--bdr);
+  word-break:break-word; white-space:normal;
+}
+/* Options — fully adaptive height, never clips text */
+.opts{ display:flex; flex-direction:column; gap:7px; width:100%; }
+.opt{
+  display:flex; align-items:flex-start; gap:9px;
+  padding:11px 12px; background:var(--card2);
+  border:1px solid var(--bdr); border-radius:11px;
+  color:var(--text); font-family:'Rajdhani',sans-serif;
+  font-size:.94rem; font-weight:600;
+  text-align:left; cursor:pointer;
+  transition:border-color .2s, background .2s, transform .15s;
+  width:100%; line-height:1.4;
+  word-break:break-word; white-space:normal;
+  min-height:44px;
+}
+.opt:hover:not(:disabled){ border-color:var(--el); background:rgba(0,212,255,.06); transform:translateX(3px); }
+.opt:disabled{ cursor:default; }
+.opt.ok{ border-color:var(--ok)!important; background:rgba(0,230,118,.1)!important; color:var(--ok)!important; }
+.opt.no{ border-color:var(--danger)!important; background:rgba(255,51,68,.1)!important; color:var(--danger)!important; }
+.ol{ display:inline-flex; align-items:center; justify-content:center; min-width:22px; width:22px; height:22px; border-radius:5px; background:rgba(255,255,255,.06); font-size:.68rem; font-weight:700; font-family:'Orbitron',monospace; flex-shrink:0; margin-top:1px; }
+
+/* ══════════ FEEDBACK ══════════ */
+#f{ justify-content:flex-start; gap:14px; padding:20px 18px; }
+.fwrap{ display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; }
+.fico{ font-size:4.5rem; animation:fbnc .45s ease-out; flex-shrink:0; }
+@keyframes fbnc{ 0%{transform:scale(.2);opacity:0} 60%{transform:scale(1.18)} 100%{transform:scale(1);opacity:1} }
+.ftit{ font-family:'Orbitron',monospace; font-size:1.6rem; font-weight:900; letter-spacing:2px; text-align:center; }
+.kok{ color:var(--ok); } .kno{ color:var(--danger); }
+.fpts{ font-family:'Orbitron',monospace; font-size:.9rem; font-weight:700; color:var(--gold); }
+/* Correct answer box — adapts to text length */
+.fans{
+  font-size:.88rem; color:var(--ok); font-weight:600;
+  padding:10px 13px; border:1px solid rgba(0,230,118,.35);
+  border-radius:10px; background:rgba(0,230,118,.06);
+  width:100%; max-width:380px; line-height:1.5;
+  word-break:break-word; white-space:normal;
+}
+/* Explanation — adapts to text length */
+.fexp{
+  font-size:.87rem; color:var(--dim); line-height:1.65;
+  max-width:380px; padding:12px 14px;
+  background:var(--card); border-radius:12px; border:1px solid var(--bdr);
+  width:100%; word-break:break-word; white-space:normal;
+}
+
+/* ══════════ GAMEOVER ══════════ */
+#go{ gap:14px; padding-top:32px; }
+.gotit{ font-family:'Orbitron',monospace; font-size:1.3rem; font-weight:900; color:var(--gold); text-align:center; }
+.gosub{ font-size:.87rem; color:var(--dim); text-align:center; line-height:1.65; max-width:350px; word-break:break-word; }
+.finsc{ display:flex; flex-direction:column; gap:7px; width:100%; }
+.frow{ display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--card); border:1px solid var(--bdr); border-radius:12px; }
+.frow.win{ border-color:var(--gold); background:rgba(255,215,0,.05); }
+.frank{ font-family:'Orbitron',monospace; font-size:1.05rem; font-weight:900; color:var(--dim); width:26px; text-align:center; flex-shrink:0; }
+.fg{color:var(--gold)} .fs{color:#ccc} .fb{color:#cd7f32}
+.fname{ font-size:1rem; font-weight:700; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fpts2{ font-family:'Share Tech Mono',monospace; font-size:1.1rem; font-weight:700; color:var(--el); flex-shrink:0; }
+.go-actions{ display:flex; flex-direction:column; gap:7px; width:90%; flex-shrink:0; }
+
+/* ── ANIMATIONS ── */
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.shake{ animation:shake .4s ease-out; }
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="flash"></div>
+<div id="app">
+
+<!-- ══ WELCOME ══ -->
+<div class="scr on" id="w">
+  <div class="sp"></div>
+  <div class="logo">⚡</div>
+  <div class="h1">ELECTRO<br>TRIVIA</div>
+  <div class="sub">Seguridad Eléctrica Industrial</div>
+  <div class="div">⚡</div>
+  <p class="w-desc">Pon a prueba tus conocimientos basados en <strong style="color:var(--el)">NFPA 70E</strong>, <strong style="color:var(--el)">OSHA</strong> y normativas internacionales. 60 preguntas verificadas.</p>
+  <div style="display:flex;flex-direction:column;gap:9px;width:100%">
+    <button class="btn btn-gd" onclick="go('s')">⚡ COMENZAR JUEGO</button>
+    <button class="btn btn-ghost" onclick="showHowTo()">📖 Cómo jugar</button>
+  </div>
+  <div class="sp"></div>
+  <div class="badge">INSEIN SRL · Mes de la Seguridad Eléctrica</div>
+  <div class="g16"></div>
+</div>
+
+<!-- ══ SETUP ══ -->
+<div class="scr" id="s">
+  <div class="g20"></div>
+  <div class="h1" style="font-size:1.4rem">Configurar Partida</div>
+  <div class="sub" style="margin-top:4px">¿Cuántos jugadores?</div>
+  <div class="g12"></div>
+  <div class="cnt-grid">
+    <button class="cnt-btn sel" onclick="selN(1)">1</button>
+    <button class="cnt-btn" onclick="selN(2)">2</button>
+    <button class="cnt-btn" onclick="selN(3)">3</button>
+    <button class="cnt-btn" onclick="selN(4)">4</button>
+  </div>
+  <div class="g10"></div>
+  <div class="p-inputs" id="pi"></div>
+  <div class="g8"></div>
+  <div class="seen-info" id="seen-info">📚 60 preguntas disponibles</div>
+  <div class="sp"></div>
+  <button class="btn btn-el" onclick="startGame()" style="width:100%">⚡ ¡JUGAR AHORA!</button>
+  <div class="g8"></div>
+  <button class="btn btn-warn" onclick="doReset()" style="width:100%">🔄 Reiniciar historial de preguntas</button>
+  <div class="g8"></div>
+  <button class="btn btn-ghost" onclick="go('w')" style="width:100%">← Volver</button>
+  <div class="g16"></div>
+</div>
+
+<!-- ══ WHEEL ══ -->
+<div class="scr" id="wh">
+  <div class="sb" id="sb"></div>
+  <div class="turn" id="ti">⚡ Turno de Jugador 1</div>
+  <div class="wwrap">
+    <div class="ptr"></div>
+    <canvas id="wc" width="400" height="400"></canvas>
+  </div>
+  <div class="cleg" id="cl"></div>
+  <div class="rctr" id="rc">PREGUNTA 1 / 12</div>
+  <button class="btn btn-gd" id="spinbtn" onclick="spinWheel()" style="width:80%">⚡ GIRAR RULETA</button>
+  <div class="g8"></div>
+</div>
+
+<!-- ══ QUESTION ══ -->
+<div class="scr" id="q">
+  <div class="cban" id="cb">
+    <span class="cico" id="ci">⚡</span>
+    <span class="cname" id="cn">Riesgos Eléctricos</span>
+  </div>
+  <div class="qmeta">
+    <div class="qplayer" id="qp">Jugador 1</div>
+    <div class="tring">
+      <svg width="54" height="54" viewBox="0 0 54 54">
+        <circle class="tbg" cx="27" cy="27" r="25"/>
+        <circle class="tprog" id="tp" cx="27" cy="27" r="25"/>
+      </svg>
+      <div class="tval" id="tv">30</div>
+    </div>
+  </div>
+  <div class="qtxt" id="qt">Cargando pregunta...</div>
+  <div class="opts" id="og"></div>
+  <div class="g8"></div>
+</div>
+
+<!-- ══ FEEDBACK ══ -->
+<div class="scr" id="f">
+  <div class="sp"></div>
+  <div class="fwrap">
+    <div class="fico" id="fi">⚡</div>
+    <div class="ftit" id="ft">¡CORRECTO!</div>
+    <div class="fpts" id="fpt"></div>
+    <div class="fans" id="fa" style="display:none"></div>
+    <div class="fexp" id="fe"></div>
+  </div>
+  <div class="sp"></div>
+  <button class="btn btn-el" onclick="nextTurn()" style="width:90%">Continuar →</button>
+  <div class="g20"></div>
+</div>
+
+<!-- ══ GAMEOVER ══ -->
+<div class="scr" id="go">
+  <div class="g20"></div>
+  <div style="font-size:3rem;text-align:center;flex-shrink:0">🏆</div>
+  <div class="gotit">JUEGO TERMINADO</div>
+  <div class="gosub" id="gs">¡Gracias por participar!</div>
+  <div class="div">⚡</div>
+  <div class="finsc" id="fs"></div>
+  <div class="sp"></div>
+  <div class="go-actions">
+    <button class="btn btn-gd" onclick="restart()">🔄 JUGAR DE NUEVO</button>
+    <button class="btn btn-ghost" onclick="go('w')">🏠 Inicio</button>
+  </div>
+  <div class="g24"></div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  BANCO DE 60 PREGUNTAS (10 por categoría)
+//  Fuentes: NFPA 70E, OSHA 1910 / 1926, IEC 60446/60529,
+//           ASTM D120/F2413, ANSI Z87.1/Z89.1, NEC
+// ═══════════════════════════════════════════════════════════
+
+const CATS=[
+  {id:0,short:'Riesgos',  full:'Riesgos Eléctricos', ico:'⚡',col:'#FFD700'},
+  {id:1,short:'Proced.',  full:'Procedimientos',      ico:'🔧',col:'#00C8FF'},
+  {id:2,short:'NFPA',     full:'Normativa NFPA',      ico:'🔥',col:'#FF4444'},
+  {id:3,short:'EPP',      full:'EPP & Protección',    ico:'🦺',col:'#00E676'},
+  {id:4,short:'Instal.',  full:'Instalaciones',       ico:'🔌',col:'#FF8800'},
+  {id:5,short:'OSHA',     full:'OSHA & Normas',       ico:'📋',col:'#BB86FC'},
+];
+const PCOLS=['#00C8FF','#00E676','#FF8800','#BB86FC'];
+const PICOS=['👷','👩‍🔧','🧑‍💼','👨‍🔬'];
+
+const QS=[
+// ── RIESGOS ELÉCTRICOS (c:0) ──────────────────────────────
+{id:'r01',c:0,
+ q:"¿Cuáles son los dos principales riesgos eléctricos en el trabajo según NFPA 70E?",
+ o:["Arco Eléctrico y Choque Eléctrico","Tormentas y Sobretensión","Cortocircuito y Apagón","Sobrecarga y Corrosión"],
+ a:0,e:"El Arco Eléctrico y el Choque Eléctrico son los dos principales riesgos según NFPA 70E. Un arco puede liberar energía devastadora en milisegundos."},
+{id:'r02',c:0,
+ q:"¿A partir de qué voltaje una instalación eléctrica puede provocar lesiones severas o fatales?",
+ o:["50 voltios (V)","110 voltios (V)","220 voltios (V)","380 voltios (V)"],
+ a:0,e:"Voltajes superiores a 50 V se consideran peligrosos. Corrientes de apenas 100 mA atravesando el corazón pueden causar fibrilación ventricular y muerte."},
+{id:'r03',c:0,
+ q:"Estadísticamente, por cada 10 lesiones eléctricas registrables en la industria ocurre:",
+ o:["Una fatalidad","Un accidente con pérdida de tiempo","Una falla mayor de equipo","Dos hospitalizaciones"],
+ a:0,e:"Las estadísticas industriales muestran 1 fatalidad por cada 10 lesiones eléctricas registrables, lo que evidencia la severidad única del riesgo eléctrico frente a otros."},
+{id:'r04',c:0,
+ q:"¿Cuál es el efecto más letal del paso de corriente eléctrica a través del cuerpo humano?",
+ o:["Fibrilación ventricular (paro cardíaco)","Quemaduras superficiales en la piel","Contracción muscular violenta","Pérdida temporal de consciencia"],
+ a:0,e:"La fibrilación ventricular es el efecto más peligroso: corrientes de 100–200 mA desorganizan el ritmo cardíaco causando paro cardíaco. Sin desfibrilación inmediata, es fatal."},
+{id:'r05',c:0,
+ q:"La resistencia eléctrica del cuerpo humano disminuye drásticamente cuando:",
+ o:["La piel está húmeda o mojada","La persona está descansada","El voltaje aplicado es bajo (<50 V)","Se usa ropa gruesa de trabajo"],
+ a:0,e:"La humedad puede reducir la resistencia corporal de ~100,000 Ω hasta menos de 1,000 Ω, multiplicando la corriente que atraviesa el cuerpo y elevando el riesgo de lesión fatal."},
+{id:'r06',c:0,
+ q:"¿A qué temperatura puede llegar un arco eléctrico en los primeros milisegundos?",
+ o:["Hasta 20,000 °C (4 veces la superficie del sol)","Hasta 5,000 °C","Hasta 1,000 °C","Hasta 500 °C"],
+ a:0,e:"Un arco eléctrico puede alcanzar 20,000 °C, vaporizar metales, generar una onda de presión violenta y proyectiles de metal fundido, siendo mortal a varios metros de distancia."},
+{id:'r07',c:0,
+ q:"¿Qué rango de corriente alterna (CA) puede causar fibrilación ventricular en adultos?",
+ o:["100 a 200 mA","1 a 5 mA","500 mA a 1 A","10 A o más"],
+ a:0,e:"Corrientes de 100–200 mA son suficientes para causar fibrilación ventricular. Corrientes mayores causan quemaduras severas pero el corazón puede recuperar su ritmo por sí solo."},
+{id:'r08',c:0,
+ q:"Además del calor extremo, ¿qué otros peligros genera un arco eléctrico?",
+ o:["Onda de presión, gases tóxicos y proyectiles de metal fundido","Solo ruido de alta intensidad","Únicamente daños en el equipo eléctrico","Solo afecta en sistemas de alta tensión (>1,000 V)"],
+ a:0,e:"Un evento de arco eléctrico genera simultáneamente: calor extremo (20,000°C), onda de presión (blast), partículas fundidas, gases tóxicos y radiación intensa que causan lesiones múltiples."},
+{id:'r09',c:0,
+ q:"¿Cuál es el efecto esperado de una corriente eléctrica de 1 a 8 mA en el cuerpo humano?",
+ o:["Hormigueo, percepción eléctrica y posible reacción de sorpresa","Muerte o paro cardíaco inmediato","Fibrilación ventricular irreversible","Quemaduras severas en punto de contacto"],
+ a:0,e:"A 1–8 mA se percibe una sensación de hormigueo o calambre. Aunque no es letal por sí sola, puede causar una reacción involuntaria (caída, golpe) que resulta en accidente grave."},
+{id:'r10',c:0,
+ q:"Si un compañero entra en contacto con un conductor eléctrico energizado, lo PRIMERO que debo hacer es:",
+ o:["Cortar la fuente de energía eléctrica antes de tocar a la víctima","Jalar a la víctima con mis manos para alejarla del conductor","Aplicar agua sobre la víctima para enfriar las quemaduras","Iniciar RCP de inmediato sin cortar primero la energía"],
+ a:0,e:"Tocar a una víctima en contacto con electricidad convierte al rescatador en segunda víctima. SIEMPRE desconectar la fuente de energía primero. Luego aplicar primeros auxilios y pedir emergencias."},
+
+// ── PROCEDIMIENTOS (c:1) ─────────────────────────────────
+{id:'p01',c:1,
+ q:"Antes de intervenir una instalación eléctrica, lo primero que SIEMPRE debo hacer es:",
+ o:["Obtener una Condición de Trabajo Eléctricamente Segura (LOTO)","Interrumpir el suministro sin notificar a nadie","Comunicar solo a mi supervisor y proceder","Colocar guantes y comenzar el trabajo de inmediato"],
+ a:0,e:"La Condición de Trabajo Eléctricamente Segura, obtenida mediante el procedimiento LOTO (Bloqueo y Etiquetado), es el requisito fundamental antes de cualquier intervención eléctrica."},
+{id:'p02',c:1,
+ q:"Para desconectar un alimentador mientras el proceso está en operación, debo:",
+ o:["Completar el procedimiento de aislamiento de energías (LOTO)","Sujetar los cables energizados con guantes de trabajo gruesos","Avisar a compañeros y proceder rápidamente","Esperar la autorización verbal del supervisor únicamente"],
+ a:0,e:"El procedimiento LOTO garantiza el aislamiento seguro de TODAS las energías peligrosas. Los guantes de trabajo estándar NO son sustituto del aislamiento de energías."},
+{id:'p03',c:1,
+ q:"¿Puede cualquier persona de planta abrir un tablero eléctrico para restablecer la energía?",
+ o:["No: es tarea exclusiva de electricistas calificados y autorizados","Sí, solo debe volver a cerrar el interruptor disparado","Sí, si usa guantes de trabajo estándar de cuero","Solo si la urgencia de producción lo justifica"],
+ a:0,e:"Los tableros eléctricos solo pueden ser intervenidos por personal calificado y autorizado. Hacerlo sin formación adecuada puede resultar fatal para el trabajador y otros presentes."},
+{id:'p04',c:1,
+ q:"El procedimiento LOTO (Bloqueo y Etiquetado) se utiliza para:",
+ o:["Controlar todas las energías peligrosas durante trabajos de mantenimiento","Identificar y mapear circuitos en tableros eléctricos","Registrar todos los incidentes eléctricos de la planta","Calibrar instrumentos de medición eléctrica"],
+ a:0,e:"LOTO protege a los trabajadores aislando y controlando todas las energías peligrosas (eléctrica, hidráulica, neumática, térmica) durante tareas de mantenimiento o reparación."},
+{id:'p05',c:1,
+ q:"Al realizar trabajos en sistemas eléctricos energizados, se requiere como mínimo:",
+ o:["Dos personas: un ejecutor y un observador de seguridad capacitado","Una sola persona calificada es suficiente para mayor eficiencia","Cuatro personas para garantizar la máxima seguridad posible","Depende exclusivamente del nivel de voltaje del sistema"],
+ a:0,e:"Según NFPA 70E y OSHA 1910.333, los trabajos en sistemas energizados requieren mínimo 2 personas: el ejecutor y un observador capacitado para responder emergencias eléctricas."},
+{id:'p06',c:1,
+ q:"Después de aplicar LOTO, ¿cómo verifico que el equipo está realmente desenergizado?",
+ o:["Intento de arranque + verificación con voltímetro calibrado en todos los conductores","Confío en que el candado fue bien aplicado sin más verificación","Pregunto al operador de turno si apagó el circuito correctamente","Verifico que las luces indicadoras del panel estén apagadas"],
+ a:0,e:"La verificación de ausencia de tensión requiere: intentar arrancar el equipo (sin éxito) y medir con voltímetro calibrado en cada conductor. Solo así se confirma la desenergización real."},
+{id:'p07',c:1,
+ q:"Un Permiso de Trabajo para sistemas eléctricos energizados debe incluir:",
+ o:["Descripción del trabajo, EPP requerido, límites de energía y firmas autorizadas","Solo el nombre del trabajador ejecutor y la fecha","Solo el número del tablero eléctrico afectado","Solo la duración estimada del trabajo a realizar"],
+ a:0,e:"Un Permiso de Trabajo Energizado debe incluir: descripción detallada del trabajo, análisis de riesgo, EPP requerido, límites de aproximación, firmas del ejecutor y del autorizador."},
+{id:'p08',c:1,
+ q:"¿Qué se entiende por 'trabajo eléctrico energizado' o 'trabajo en caliente'?",
+ o:["Trabajo en sistemas con tensión presente, sin aislamiento completo (sin LOTO completo)","Trabajo realizado en días de verano o temperaturas altas","Trabajo con equipos industriales que operan a altas temperaturas","Trabajo de soldadura u oxicorte en áreas eléctricas"],
+ a:0,e:"El trabajo en caliente eléctrico es aquel que se realiza con el sistema energizado (con tensión presente), lo que representa el mayor riesgo. Solo se justifica si LOTO es técnicamente imposible."},
+{id:'p09',c:1,
+ q:"Si encuentro un cable eléctrico de media/alta tensión caído en el suelo, debo:",
+ o:["Aislar el área, no acercarme y llamar a personal calificado de inmediato","Recogerlo usando guantes de trabajo de cuero gruesos","Alejarlo con una escoba de madera sin punta metálica","Dejarlo en su lugar y continuar mis actividades normalmente"],
+ a:0,e:"Un cable caído puede energizar el suelo varios metros a la redonda (tensión de paso). NUNCA acercarse. Aislar el área, llamar a la empresa distribuidora y esperar al personal calificado."},
+{id:'p10',c:1,
+ q:"La verificación de ausencia de tensión antes de trabajar en un circuito debe hacerse:",
+ o:["Con voltímetro calibrado y certificado, en todos los conductores del circuito","Visualmente verificando que el interruptor esté en posición OFF","Preguntando al operador de turno si apagó el circuito","Solo en sistemas de alta tensión (>1,000 V), no en baja tensión"],
+ a:0,e:"La posición de un interruptor no garantiza ausencia de tensión. Se requiere voltímetro calibrado, probado en fuente conocida antes y después de la medición, en cada conductor del circuito."},
+
+// ── NORMATIVA NFPA (c:2) ─────────────────────────────────
+{id:'n01',c:2,
+ q:"¿Para qué es fundamental conocer la energía incidente en un punto de maniobra eléctrico?",
+ o:["Advertir el riesgo de arco e implementar el EPP y medidas de control adecuadas","Seleccionar herramientas de mayor tamaño y resistencia mecánica","Dimensionar correctamente los conductores eléctricos del circuito","Calcular el consumo energético mensual de la instalación"],
+ a:0,e:"La energía incidente (cal/cm²) determina qué EPP se necesita para sobrevivir un arco eléctrico. Sin este dato, el trabajador puede usar protección insuficiente y sufrir quemaduras fatales."},
+{id:'n02',c:2,
+ q:"Según NFPA 70E, ¿cuántas Categorías de Riesgo (HRC) de EPP contra arco eléctrico existen?",
+ o:["4 categorías: HRC 1 (4 cal/cm²) hasta HRC 4 (40 cal/cm²)","2 categorías: baja energía y alta energía","6 categorías según el nivel de voltaje del sistema","8 niveles progresivos de protección establecidos"],
+ a:0,e:"NFPA 70E define 4 Hazard/Risk Categories (HRC). HRC 1 = mín. 4 cal/cm², HRC 2 = 8, HRC 3 = 25, HRC 4 = 40 cal/cm². La categoría define el EPP mínimo obligatorio para cada tarea."},
+{id:'n03',c:2,
+ q:"¿Qué es el 'Arc Flash Boundary' (Límite de Peligro de Arco Eléctrico) según NFPA 70E?",
+ o:["Distancia donde una persona sin EPP puede sufrir quemaduras de 2° grado curables","Área de trabajo asignada exclusivamente al electricista calificado","Zona sin acceso para el público general de la planta","Perímetro de seguridad perimetral de la subestación eléctrica"],
+ a:0,e:"El Arc Flash Boundary es la distancia a la que una persona recibiría 1.2 cal/cm² —umbral de quemaduras de 2° grado curables— si ocurriera un evento de arco. Más cerca = fatal sin EPP."},
+{id:'n04',c:2,
+ q:"Según NFPA 70E, una 'Persona Calificada' (Qualified Person) es quien:",
+ o:["Recibió capacitación específica en construcción y operación de equipos eléctricos","Tiene más de 5 años de experiencia trabajando en planta industrial","Cuenta con EPP completo, actualizado y con pruebas vigentes","Conoce el código de colores de los conductores eléctricos del sistema"],
+ a:0,e:"NFPA 70E define a la Persona Calificada como quien tiene entrenamiento demostrable sobre la naturaleza, operación y los riesgos eléctricos específicos de los equipos con los que trabaja."},
+{id:'n05',c:2,
+ q:"La norma NFPA 70 (Código Eléctrico Nacional - NEC) establece principalmente:",
+ o:["Requisitos mínimos de seguridad para instalaciones eléctricas y protección de personas","Diseño y especificaciones de equipos eléctricos industriales y de potencia","Procedimientos de mantenimiento para sistemas de alta tensión","Gestión de emergencias eléctricas en instalaciones industriales"],
+ a:0,e:"El NEC (NFPA 70) es la referencia global para instalaciones eléctricas seguras, adoptado en LATAM como referencia técnica. Su objetivo: proteger personas y propiedades de los riesgos eléctricos."},
+{id:'n06',c:2,
+ q:"El 'Límite de Aproximación Restringido' (Restricted Approach Boundary) según NFPA 70E es:",
+ o:["Distancia mínima donde solo personal calificado con EPP apropiado puede ingresar","Área libre de acceso para todos con EPP básico de la empresa","Distancia de trabajo estándar para operadores de maquinaria industrial","Zona de emergencia activada únicamente durante incendios eléctricos"],
+ a:0,e:"El Restricted Approach Boundary es la distancia más cercana a partes energizadas donde solo personal calificado con EPP específico para el nivel de energía puede ingresar a trabajar."},
+{id:'n07',c:2,
+ q:"La etiqueta de 'Peligro de Arco Eléctrico' en un tablero debe indicar como mínimo:",
+ o:["Energía incidente (cal/cm²), límites de aproximación y categoría de EPP requerida","Solo el voltaje nominal del sistema eléctrico","Solo la fecha de instalación o última revisión del tablero","Solo el nombre y contacto del responsable de mantenimiento"],
+ a:0,e:"Según NFPA 70E, la etiqueta de arc flash debe incluir: energía incidente en cal/cm², nivel de PPE requerido y límites de aproximación. Sin esta info, el trabajador no puede elegir el EPP correcto."},
+{id:'n08',c:2,
+ q:"Según NFPA 70E, ¿con qué frecuencia debe actualizarse un estudio de Arc Flash?",
+ o:["Cada 5 años o cuando hay cambios significativos en el sistema eléctrico","Cada 10 años como mínimo requerido por la normativa","Solo cuando ocurre un incidente eléctrico en la instalación","No requiere actualización periódica una vez realizado correctamente"],
+ a:0,e:"NFPA 70E requiere actualizar el estudio de Arc Flash cada 5 años o ante cambios: nuevos equipos, cambios de configuración, ampliaciones o modificaciones de la protección eléctrica del sistema."},
+{id:'n09',c:2,
+ q:"Para trabajar dentro del Arc Flash Boundary, las herramientas manuales deben ser:",
+ o:["Aisladas con clasificación mínima de 1,000 V (IEC 60900 / ASTM F1505)","Herramientas estándar de cualquier ferretería industrial local","Cualquier herramienta que tenga mango o recubrimiento de plástico","Herramientas de madera sin herrajes metálicos en el cuerpo"],
+ a:0,e:"IEC 60900 y ASTM F1505 definen herramientas aisladas para 1,000 V mínimo. Un destornillador estándar de plástico NO es una herramienta aislada certificada y puede causar un arco eléctrico."},
+{id:'n10',c:2,
+ q:"La ropa retardante de llama (FR - Flame Resistant) frente a un evento de arco eléctrico:",
+ o:["Reduce las quemaduras al no encenderse ni derretirse sobre la piel del trabajador","Protege igual que cualquier ropa gruesa de trabajo o denim","No aporta protección adicional significativa frente al arco eléctrico","Aumenta el riesgo al atrapar y retener el calor del arco sobre la piel"],
+ a:0,e:"La ropa FR no se enciende ni se derrite, lo que limita las quemaduras al período de exposición directa al arco. La ropa sintética (poliéster) se derrite y adhiere a la piel agravando las lesiones."},
+
+// ── EPP & PROTECCIÓN (c:3) ───────────────────────────────
+{id:'e01',c:3,
+ q:"Para prevenir choques eléctricos de manera integral, un trabajador debe:",
+ o:["Combinar: diseño seguro + aplicar normas + restricción a personal calificado","Solo conocer el diseño e instalación del sistema eléctrico de planta","Solo aplicar los códigos y normas técnicas disponibles en la empresa","Solo restringir el trabajo a personal con certificación vigente"],
+ a:0,e:"La prevención efectiva exige enfoque multicapa: diseño intrínsecamente seguro + aplicación de normativa + personal calificado. Ninguna medida aislada es suficiente para eliminar el riesgo."},
+{id:'e02',c:3,
+ q:"Al recibir equipo nuevo en planta con borne de puesta a tierra, la acción correcta es:",
+ o:["Revisar el manual del fabricante e instalar y conectar según sus instrucciones","Solo conectar la energía a los bornes de fase, ignorando el borne de tierra","Verificar el código de colores de conductores y dar por completa la instalación","Consultar al jefe de planta antes de revisar cualquier documentación técnica"],
+ a:0,e:"El manual del fabricante contiene instrucciones críticas de instalación. La puesta a tierra NUNCA debe omitirse ni improvisarse: es esencial para proteger la vida del personal de operación."},
+{id:'e03',c:3,
+ q:"Trabajar cerca de componentes eléctricos energizados manteniendo distancia y usando EPP básico:",
+ o:["Sigue siendo peligroso: siempre requiere personal competente y permiso especial","Es seguro si se mantiene distancia suficiente con EPP básico estándar","El nivel de riesgo depende exclusivamente del voltaje presente en el sistema","Solo requiere que haya un supervisor de turno presente en el área de trabajo"],
+ a:0,e:"Según NFPA 70E y OSHA, trabajar cerca de sistemas energizados SIEMPRE requiere personal competente, análisis de riesgo, EPP específico y permiso especial, independientemente de la distancia."},
+{id:'e04',c:3,
+ q:"Los guantes dieléctricos de protección eléctrica deben inspeccionarse y probarse:",
+ o:["Antes de cada uso (inspección visual + inflado) y prueba en laboratorio cada 6 meses","Solo cuando se observen daños o deterioro visible en el material del guante","Una vez al mes mediante inspección visual realizada por el supervisor de seguridad","Cada 5 años según la especificación original del fabricante del guante"],
+ a:0,e:"ASTM D120 y NFPA 70E exigen: inspección visual + prueba de inflado antes de CADA uso, y prueba dieléctrica certificada en laboratorio cada 6 meses. Sin prueba vigente, el guante no es seguro."},
+{id:'e05',c:3,
+ q:"El calzado adecuado para un electricista que trabaja con sistemas energizados es:",
+ o:["Botas dieléctricas con punta de seguridad no conductora y suela aislante (ASTM F2413)","Zapatos deportivos con suela de goma gruesa de uso deportivo normal","Botas de goma estándar de uso industrial sin certificación eléctrica","Cualquier calzado de seguridad industrial certificado con punta de acero"],
+ a:0,e:"Las botas dieléctricas (ASTM F2413, clase EH) aíslan eléctricamente al trabajador del suelo. Las puntas de acero son conductoras y NO proporcionan protección dieléctrica alguna."},
+{id:'e06',c:3,
+ q:"Las categorías HRC del EPP contra arco eléctrico definen:",
+ o:["El nivel mínimo de protección en cal/cm² que debe tener la ropa según la tarea","El color del EPP que debe usarse en cada área de trabajo de la planta","El precio referencial del equipo de protección personal para presupuesto","Solo son aplicables en trabajos de alta tensión (>1,000 V nominal)"],
+ a:0,e:"Las HRC (Hazard/Risk Categories) definen la protección mínima en cal/cm² que debe tener la indumentaria. Usar una categoría inferior a la requerida puede resultar en quemaduras mortales."},
+{id:'e07',c:3,
+ q:"Las gafas o careta facial para trabajo eléctrico con riesgo de arco deben cumplir:",
+ o:["Resistencia a impacto, radiación UV y protección arc-rated según ANSI Z87.1","Solo ser de plástico transparente y liviano para mayor visibilidad de trabajo","Cualquier gafa deportiva certificada para alto impacto es completamente suficiente","Solo se requieren en espacios confinados y en trabajos en altura eléctrica"],
+ a:0,e:"La careta y gafas deben ser arc-rated según ANSI Z87.1, con resistencia al impacto, radiación UV y, para trabajos eléctricos, calificadas para la energía incidente del punto de trabajo."},
+{id:'e08',c:3,
+ q:"Los guantes de cuero se usan SOBRE los guantes dieléctricos al trabajar en sistemas eléctricos porque:",
+ o:["Protegen a los dieléctricos de cortes y abrasiones que reducirían su aislamiento","Reemplazan a los guantes dieléctricos en sistemas de baja tensión (<600 V)","Aportan mayor comodidad y destreza manual únicamente, sin función técnica","No se deben usar guantes de cuero sobre guantes dieléctricos en ningún caso"],
+ a:0,e:"Los guantes dieléctricos son vulnerables a cortes y perforaciones que anularían su aislamiento. Los de cuero los protegen mecánicamente. Ambos se usan siempre juntos en trabajos eléctricos."},
+{id:'e09',c:3,
+ q:"El EPP mínimo para abrir la puerta de un tablero de BT energizado (HRC 1/Cat. 1) incluye:",
+ o:["Ropa FR, casco con careta arc-rated, guantes dieléctricos y protección auditiva","Solo guantes de látex y gafas de seguridad estándar de plástico","Gafas de seguridad estándar y zapatos cerrados únicamente","Ningún EPP especial si la puerta del tablero es de material transparente"],
+ a:0,e:"Incluso para tareas simples como abrir un tablero energizado (HRC 1), NFPA 70E exige: ropa FR, casco dieléctrico con careta arc-rated (mín. 4 cal/cm²) y guantes dieléctricos clase 00."},
+{id:'e10',c:3,
+ q:"Un casco de seguridad clase E (Eléctrico) protege contra voltajes de prueba de:",
+ o:["20,000 V en prueba dieléctrica según ANSI/ISEA Z89.1","Todos los voltajes industriales sin límite superior definido","Solo hasta 480 V de uso en sistemas industriales comunes","1,000 V únicamente, igual que los guantes dieléctricos clase 00"],
+ a:0,e:"ANSI/ISEA Z89.1 define la Clase E (Eléctrico) como cascos probados a 20,000 V. La Clase G (General) solo se prueba a 2,200 V. En trabajos eléctricos siempre se debe usar Clase E."},
+
+// ── INSTALACIONES ELÉCTRICAS (c:4) ───────────────────────
+{id:'i01',c:4,
+ q:"¿Cuál es el color estándar del conductor de puesta a tierra de protección (PE)?",
+ o:["Verde o verde con franja amarilla (IEC 60446 y NEC)","Negro (color de fase R en sistemas americanos)","Azul claro (conductor de neutro en sistemas europeos)","Rojo (conductor de fase en sistemas americanos trifásicos)"],
+ a:0,e:"IEC 60446 y el NEC establecen verde o verde/amarillo de forma obligatoria para el conductor de Tierra de Protección (PE). Esta codificación evita conexiones incorrectas que pueden ser fatales."},
+{id:'i02',c:4,
+ q:"¿Qué dispositivo protege eficazmente a las personas de descargas eléctricas por fallas a tierra?",
+ o:["Interruptor Diferencial Residual (GFCI / RCD / DDR)","Fusible convencional de vidrio o cerámica","Disyuntor termomagnético estándar de caja moldeada","Transformador de aislamiento sin conductor de tierra"],
+ a:0,e:"El GFCI/RCD detecta desequilibrios de corriente de apenas 30 mA y desconecta en <30 ms, antes de la fibrilación ventricular. Los fusibles y disyuntores protegen el cableado, NO a las personas."},
+{id:'i03',c:4,
+ q:"La función principal de la puesta a tierra de protección en una instalación eléctrica es:",
+ o:["Proporcionar camino de baja impedancia para corrientes de falla, protegiendo personas","Mejorar el factor de potencia y la eficiencia energética del sistema","Reducir el consumo de energía eléctrica en la instalación industrial","Aumentar el voltaje disponible en los puntos de consumo de la planta"],
+ a:0,e:"La puesta a tierra desvía corrientes de falla hacia tierra —en lugar de atravesar el cuerpo humano— activando los dispositivos de protección (fusibles, breakers, RCD) y salvando vidas."},
+{id:'i04',c:4,
+ q:"Una extensión eléctrica doméstica multicontacto NO debe usarse para:",
+ o:["Alimentar equipos industriales o de alta demanda de forma permanente o semipermanente","Iluminación provisional en áreas de obra durante trabajos de corta duración","Herramientas manuales eléctricas en uso temporal supervisado","Carga de dispositivos móviles personales en áreas de oficina"],
+ a:0,e:"Las extensiones domésticas no están diseñadas para cargas industriales continuas. El sobrecalentamiento progresivo puede causar incendios eléctricos, fusión del aislamiento y electrocución."},
+{id:'i05',c:4,
+ q:"El código IP67 en equipos eléctricos industriales según IEC 60529 indica:",
+ o:["Protección total contra polvo (6) e inmersión en agua hasta 1 m por 30 min (7)","Potencia máxima de operación de 67 watts del equipo eléctrico","Nivel de aislamiento dieléctrico interno del conductor a 67 kV","Categoría de instalación eléctrica clase 6, nivel de seguridad 7"],
+ a:0,e:"El código IP (Ingress Protection - IEC 60529): primer dígito = protección contra sólidos (6=hermético al polvo), segundo dígito = contra agua (7=soporta inmersión hasta 1 m/30 min)."},
+{id:'i06',c:4,
+ q:"Un tomacorriente GFCI (Ground Fault Circuit Interrupter) integrado es:",
+ o:["Un outlet con protección diferencial residual que desconecta ante fallas a tierra de 6 mA","Un tomacorriente para equipos industriales de alta potencia y corriente","Un tipo especial de fusible de alta capacidad en formato de enchufe estándar","Un regulador y estabilizador de voltaje compacto en formato de tomacorriente"],
+ a:0,e:"El GFCI integrado detecta fallas a tierra desde 6 mA (equipos médicos) o 15 mA (uso general) y desconecta en <25 ms. Es obligatorio en baños, cocinas, exteriores y zonas húmedas según NEC."},
+{id:'i07',c:4,
+ q:"La sección transversal de un conductor eléctrico (en mm² o AWG) determina principalmente:",
+ o:["Su capacidad de conducir corriente máxima sin sobrecalentarse (ampacidad)","El color identificatorio que debe tener según la normativa técnica","La distancia máxima que puede recorrer el conductor en metros lineales","Su nivel de resistencia a la humedad y a agentes químicos corrosivos"],
+ a:0,e:"La ampacidad (capacidad de corriente) depende directamente de la sección. Un conductor subdimensionado se sobrecalienta, degrada su aislamiento y puede causar incendio eléctrico o cortocircuito."},
+{id:'i08',c:4,
+ q:"En el sistema de calibres AWG (American Wire Gauge) para conductores eléctricos:",
+ o:["A mayor número AWG, menor es el diámetro y la capacidad de corriente del conductor","A mayor número AWG, mayor es el diámetro y mayor capacidad de corriente","El número AWG no indica nada sobre el tamaño físico del conductor","El sistema AWG solo aplica para conductores de alta tensión (>1,000 V)"],
+ a:0,e:"En AWG, el número es inverso al tamaño: AWG 14 es más delgado que AWG 12. AWG 4/0 (0000) es el más grueso en uso común. A menor número AWG = mayor sección = mayor ampacidad."},
+{id:'i09',c:4,
+ q:"¿Cuál es la función principal del interruptor termomagnético (breaker/disyuntor) en un circuito?",
+ o:["Proteger el cableado eléctrico contra sobrecorrientes y cortocircuitos","Proteger directamente a las personas de descargas eléctricas por contacto","Regular y estabilizar el voltaje del circuito eléctrico de la instalación","Mejorar el factor de potencia y la eficiencia energética del circuito"],
+ a:0,e:"El termomagnético protege el CABLEADO, no a las personas. Para proteger personas se requiere interruptor diferencial (RCD/GFCI). Ambos dispositivos cumplen funciones complementarias, no sustituibles."},
+{id:'i10',c:4,
+ q:"¿Por qué las instalaciones eléctricas en ambientes húmedos o mojados requieren equipos con grado IP adecuado?",
+ o:["Para evitar ingreso de humedad que genera fallas, cortocircuitos y descargas al personal","Solo por razones estéticas y de apariencia de la instalación terminada","Para cumplir requisitos administrativos sin impacto real en la seguridad","Solo es necesario en instalaciones marinas, costeras o de piscinas"],
+ a:0,e:"La humedad en equipos eléctricos sin protección IP adecuada causa: corrosión de contactos, cortocircuitos, fallas a tierra y descargas al personal. El grado IP es una medida de seguridad crítica."},
+
+// ── OSHA & NORMAS (c:5) ──────────────────────────────────
+{id:'o01',c:5,
+ q:"Según OSHA 1910.333, trabajar en sistemas eléctricos energizados requiere obligatoriamente:",
+ o:["Permiso especial de trabajo energizado y personal calificado con EPP certificado","Solo informar verbalmente al supervisor inmediato antes de iniciar el trabajo","Desconectar si es posible; si no, proceder con precaución básica estándar","Usar guantes de seguridad estándar como medida mínima aceptable"],
+ a:0,e:"OSHA 1910.333 exige: condición eléctricamente segura documentada, permiso especial de trabajo energizado, personal calificado certificado y EPP apropiado al nivel de energía del sistema."},
+{id:'o02',c:5,
+ q:"¿Qué es un 'Análisis de Riesgo de Arco Eléctrico' (Arc Flash Risk Assessment)?",
+ o:["Estudio que determina la energía incidente y el EPP requerido en puntos de maniobra","Inspección visual periódica del estado físico de los tableros eléctricos","Revisión histórica de los incidentes eléctricos registrados en la planta","Evaluación anual del estado del sistema de puesta a tierra de la instalación"],
+ a:0,e:"El Arc Flash Risk Assessment calcula la energía incidente (cal/cm²) en cada punto de maniobra mediante software especializado, para establecer límites de aproximación y EPP específico obligatorio."},
+{id:'o03',c:5,
+ q:"La distancia mínima de seguridad para trabajar cerca de líneas eléctricas aéreas según OSHA:",
+ o:["Varía según el voltaje de la línea: mayor voltaje = mayor distancia mínima requerida","Es siempre de 1 metro sin importar el voltaje de la línea aérea","Es siempre de 2 metros para cualquier nivel de voltaje eléctrico","Es de 50 cm solo para líneas de baja tensión (sistema <600 V)"],
+ a:0,e:"OSHA 1926.960 establece distancias mínimas variables: 0.6 m para ≤50 kV, aumentando progresivamente. Para 115 kV = 1.2 m, para 500 kV = 3.6 m. Mayor voltaje = mayor distancia obligatoria."},
+{id:'o04',c:5,
+ q:"Según la filosofía OSHA, el objetivo PRINCIPAL de investigar un incidente eléctrico es:",
+ o:["Identificar causas raíz y prevenir que el evento vuelva a ocurrir en el futuro","Determinar a los responsables y aplicar las sanciones económicas correspondientes","Cumplir únicamente con los requisitos legales y de reporte a las autoridades","Generar estadísticas anuales para el informe de seguridad de la empresa"],
+ a:0,e:"OSHA promueve la cultura de seguridad: investigar para aprender y prevenir, no para culpar. El objetivo es identificar causas raíz y fortalecer los sistemas de gestión para evitar recurrencias."},
+{id:'o05',c:5,
+ q:"La Jerarquía de Controles OSHA para riesgos eléctricos, de mayor a menor eficacia, es:",
+ o:["Eliminación → Sustitución → Ingeniería → Administrativos → EPP (último recurso)","EPP → Señalización → Capacitación → Rediseño del sistema eléctrico","Capacitación → EPP → Procedimientos escritos → Señalización de área","Diseño → Normas técnicas → EPP → Eliminación del riesgo eléctrico"],
+ a:0,e:"La jerarquía OSHA prioriza eliminar el riesgo en la fuente. El EPP es SIEMPRE el último recurso porque solo protege al trabajador sin eliminar el peligro real. La eliminación es la más efectiva."},
+{id:'o06',c:5,
+ q:"Según OSHA, la responsabilidad PRINCIPAL de garantizar un ambiente eléctrico seguro recae en:",
+ o:["El empleador: debe identificar peligros, proveer EPP y condiciones seguras","Solo el trabajador que ejecuta directamente la tarea eléctrica","El supervisor de turno presente en el momento del trabajo eléctrico","El fabricante de los equipos e instalaciones eléctricas de la planta"],
+ a:0,e:"OSHA establece que el empleador es el responsable principal de proveer un lugar de trabajo seguro, incluyendo: identificación de peligros, controles, EPP, capacitación y procedimientos documentados."},
+{id:'o07',c:5,
+ q:"¿Qué establece el Estándar OSHA 29 CFR 1910.147 (Control of Hazardous Energy)?",
+ o:["Los procedimientos para controlar energías peligrosas (LOTO) durante mantenimiento","Los requisitos mínimos de EPP para trabajos administrativos en oficinas industriales","Las normas de iluminación mínima requerida en plantas e instalaciones industriales","Los límites máximos de exposición al ruido en ambientes de trabajo industrial"],
+ a:0,e:"OSHA 1910.147 (Control of Hazardous Energy - LOTO) establece los requisitos para prevenir el arranque inesperado o la liberación de energía durante mantenimiento. Es una de las normas más críticas en industria."},
+{id:'o08',c:5,
+ q:"Según OSHA, un trabajador puede legítimamente negarse a realizar una tarea eléctrica si:",
+ o:["Considera que representa un peligro inminente sin EPP ni procedimientos seguros adecuados","El trabajo le resulta físicamente difícil, incómodo o le genera cansancio","No tiene una buena relación personal o profesional con el supervisor de turno","Prefiere asignarse a realizar otra tarea diferente en ese momento laboral"],
+ a:0,e:"OSHA protege el derecho del trabajador a rechazar trabajos con peligro inminente. Este derecho requiere fundamento en un riesgo real identificado, no en preferencias personales o comodidad."},
+{id:'o09',c:5,
+ q:"¿Qué es un JSA (Job Safety Analysis) aplicado a un trabajo eléctrico?",
+ o:["Análisis sistemático de pasos de la tarea, peligros asociados y controles a implementar","Un formulario administrativo de Recursos Humanos para asignación de tareas","Un registro histórico de accidentes eléctricos anteriores en la instalación","Un checklist de mantenimiento preventivo y predictivo de equipos eléctricos"],
+ a:0,e:"El JSA (también llamado ATS - Análisis de Trabajo Seguro) identifica paso a paso los peligros de una tarea eléctrica y define controles antes de iniciar. Es un requisito para permisos de trabajo eléctrico."},
+{id:'o10',c:5,
+ q:"El programa de capacitación eléctrica de OSHA establece que los trabajadores calificados deben:",
+ o:["Recibir entrenamiento específico en riesgos y procedimientos de los sistemas con que trabajan","Solo ver un video de seguridad eléctrica una única vez al año como mínimo","Solo leer y firmar el manual de seguridad eléctrica de la empresa anualmente","Aprobar un examen escrito teórico sin necesidad de práctica de campo validada"],
+ a:0,e:"OSHA exige capacitación específica y demostrable para cada tipo de trabajo eléctrico. El entrenamiento debe cubrir los riesgos reales del sistema y los procedimientos de seguridad aplicables a la tarea."},
+];
+
+// ═══════════════════════════════════════════════════════════
+//  ESTADO + HISTORIAL (localStorage)
+// ═══════════════════════════════════════════════════════════
+
+const SKEY='et_seen_v3';
+
+function loadSeen(){ try{return new Set(JSON.parse(localStorage.getItem(SKEY)||'[]'));}catch{return new Set();} }
+function saveSeen(s){ try{localStorage.setItem(SKEY,JSON.stringify([...s]));}catch{} }
+function resetSeen(){ try{localStorage.removeItem(SKEY);}catch{} }
+function unseenCount(){ const s=loadSeen(); return QS.filter(q=>!s.has(q.id)).length; }
+
+function buildPool(perCat){
+  const seen=loadSeen();
+  const pool=[];
+  for(let cat=0;cat<6;cat++){
+    const all=QS.filter(q=>q.c===cat);
+    const unseen=all.filter(q=>!seen.has(q.id));
+    const seenC=all.filter(q=>seen.has(q.id));
+    let picks=shuffle(unseen).slice(0,perCat);
+    if(picks.length<perCat) picks=[...picks,...shuffle(seenC).slice(0,perCat-picks.length)];
+    pool.push(...picks);
+  }
+  return shuffle(pool);
+}
+
+function markSeen(questions){
+  const seen=loadSeen();
+  questions.forEach(q=>seen.add(q.id));
+  if(seen.size>=QS.length){ resetSeen(); }
+  else{ saveSeen(seen); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════════════
+
+const PER_CAT=2; // questions per category per game = 12 total
+const ST={
+  nPl:1, players:[], pIdx:0,
+  curQ:null, pool:[], used:[], qDone:0, qTotal:0,
+  tInt:null, tLeft:30, wAngle:0, spinning:false,
+  displayCorrect:0, shuffledOpts:[],
+};
+const CIRC=2*Math.PI*25; // r=25 SVG circle
+
+// ═══════════════════════════════════════════════════════════
+//  SCREEN NAV
+// ═══════════════════════════════════════════════════════════
+
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function showHowTo(){
+  alert([
+    "⚡ CÓMO JUGAR ElectroTrivia",
+    "",
+    "1️⃣  Selecciona el número de jugadores y sus nombres.",
+    "2️⃣  Cada jugador gira la ruleta en su turno.",
+    "3️⃣  La categoría donde cae el puntero determina el tipo de pregunta.",
+    "4️⃣  Tienes 30 segundos para responder. ¡Piénsalo bien!",
+    "5️⃣  Respuesta correcta = +10 puntos.",
+    "6️⃣  Al finalizar las 12 preguntas, se muestra el marcador final.",
+    "",
+    "📚 60 preguntas en banco — el sistema evita repetir preguntas vistas.",
+    "🔄 Usa 'Reiniciar historial' para volver a ver todas las preguntas.",
+    "",
+    "Fuentes: NFPA 70E · OSHA 1910/1926 · IEC 60446/60529 · ASTM · NEC"
+  ].join("\n"));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════════════
+
+function updateSeenInfo(){
+  const n=unseenCount();
+  const el=document.getElementById('seen-info');
+  const pct=Math.round((n/QS.length)*100);
+  if(n===QS.length){
+    el.className='seen-info reset';
+    el.textContent=`📚 60/60 preguntas disponibles — banco completo`;
+  } else if(n>=12){
+    el.className='seen-info';
+    el.textContent=`📚 ${n}/${QS.length} preguntas nuevas disponibles (${pct}%)`;
+  } else if(n>0){
+    el.className='seen-info warn';
+    el.textContent=`⚠️ Solo ${n} preguntas nuevas — puede haber repetidas`;
+  } else {
+    el.className='seen-info reset';
+    el.textContent=`🔄 Todas las preguntas vistas — reiniciando banco automáticamente`;
+  }
+}
+
+function doReset(){
+  if(confirm('¿Reiniciar el historial de preguntas vistas?\nVerás todas las 60 preguntas de nuevo.')){
+    resetSeen();
+    updateSeenInfo();
+  }
+}
+
+function selN(n){
+  ST.nPl=n;
+  document.querySelectorAll('.cnt-btn').forEach((b,i)=>b.classList.toggle('sel',i+1===n));
+  buildInputs();
+}
+
+function buildInputs(){
+  const c=document.getElementById('pi');c.innerHTML='';
+  for(let i=0;i<ST.nPl;i++){
+    const d=document.createElement('div');d.className='p-row';
+    d.innerHTML=`<span class="p-ico">${PICOS[i]}</span>
+      <div class="p-dot" style="background:${PCOLS[i]}"></div>
+      <input class="p-inp" type="text" inputmode="text"
+             placeholder="Jugador ${i+1}" maxlength="12" id="pn${i}" value="Jugador ${i+1}">`;
+    c.appendChild(d);
+  }
+}
+
+function startGame(){
+  // Build players
+  ST.players=[];
+  for(let i=0;i<ST.nPl;i++){
+    const el=document.getElementById(`pn${i}`);
+    ST.players.push({
+      name:el?(el.value.trim()||`Jugador ${i+1}`):`Jugador ${i+1}`,
+      score:0, col:PCOLS[i], ico:PICOS[i]
+    });
+  }
+  // Build question pool preferring unseen
+  ST.pool=buildPool(PER_CAT);
+  ST.used=[];
+  ST.qDone=0;
+  ST.qTotal=ST.pool.length; // 12
+  ST.pIdx=0;
+  ST.wAngle=0;
+  buildCatLegend();
+  updateSB();updateTI();updateRC();
+  drawWheel(ST.wAngle);
+  document.getElementById('spinbtn').disabled=false;
+  go('wh');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  WHEEL
+// ═══════════════════════════════════════════════════════════
+
+function drawWheel(angle){
+  const cv=document.getElementById('wc');
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2;
+  const r=Math.min(cx,cy)-16;
+  const n=CATS.length,arc=(2*Math.PI)/n;
+  ctx.clearRect(0,0,W,H);
+
+  // Outer glow ring
+  ctx.beginPath();ctx.arc(cx,cy,r+14,0,2*Math.PI);
+  ctx.strokeStyle='rgba(0,212,255,.08)';ctx.lineWidth=14;ctx.stroke();
+  ctx.strokeStyle='rgba(0,212,255,.18)';ctx.lineWidth=2.5;ctx.stroke();
+
+  for(let i=0;i<n;i++){
+    const sa=angle+i*arc,ea=sa+arc,mid=sa+arc/2;
+    const cat=CATS[i];
+    // Fill gradient
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,sa,ea);ctx.closePath();
+    const gx=cx+Math.cos(mid)*r*.5,gy=cy+Math.sin(mid)*r*.5;
+    const g=ctx.createRadialGradient(gx,gy,0,cx,cy,r);
+    g.addColorStop(0,cat.col+'EE');g.addColorStop(1,cat.col+'77');
+    ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=2;ctx.stroke();
+
+    // Text — flip if on left half to keep readable
+    const nm=((mid%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+    const left=nm>Math.PI/2&&nm<3*Math.PI/2;
+    ctx.save();ctx.translate(cx,cy);
+    if(left){
+      ctx.rotate(mid+Math.PI);ctx.textAlign='left';
+      ctx.font=`${r*.155}px serif`;ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillText(cat.ico,-r*.8,1);
+      ctx.fillStyle='#fff';ctx.fillText(cat.ico,-r*.8,0);
+      ctx.font=`bold ${r*.092}px Rajdhani,sans-serif`;
+      ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillText(cat.short,-r*.56,11);
+      ctx.fillStyle='#fff';ctx.fillText(cat.short,-r*.56,10);
+    }else{
+      ctx.rotate(mid);ctx.textAlign='right';
+      ctx.font=`${r*.155}px serif`;ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(0,0,0,.35)';ctx.fillText(cat.ico,r*.8,1);
+      ctx.fillStyle='#fff';ctx.fillText(cat.ico,r*.8,0);
+      ctx.font=`bold ${r*.092}px Rajdhani,sans-serif`;
+      ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillText(cat.short,r*.56,11);
+      ctx.fillStyle='#fff';ctx.fillText(cat.short,r*.56,10);
+    }
+    ctx.restore();
+  }
+
+  // Center hub
+  const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,27);
+  cg.addColorStop(0,'#1a2a4a');cg.addColorStop(1,'#050c1a');
+  ctx.beginPath();ctx.arc(cx,cy,27,0,2*Math.PI);
+  ctx.fillStyle=cg;ctx.fill();
+  ctx.strokeStyle='#FFD700';ctx.lineWidth=2.5;ctx.stroke();
+  ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⚡',cx,cy+1);
+}
+
+function spinWheel(){
+  if(ST.spinning||ST.pool.length===0)return;
+  document.getElementById('spinbtn').disabled=true;
+  ST.spinning=true;
+  const extra=(4+Math.floor(Math.random()*4))*2*Math.PI+Math.random()*2*Math.PI;
+  const target=ST.wAngle+extra;
+  const dur=2800+Math.random()*1800;
+  const t0=performance.now(),s0=ST.wAngle;
+  function tick(now){
+    const p=Math.min((now-t0)/dur,1);
+    const e=1-Math.pow(1-p,3); // ease-out cubic
+    ST.wAngle=s0+(target-s0)*e;
+    drawWheel(ST.wAngle);
+    if(p<1){requestAnimationFrame(tick);}
+    else{
+      ST.wAngle=target;drawWheel(ST.wAngle);ST.spinning=false;
+      const cid=getCat(ST.wAngle);
+      screenFlash(CATS[cid].col,()=>showQ(cid));
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function getCat(angle){
+  const arc=(2*Math.PI)/CATS.length;
+  // Pointer at top = 3π/2 in canvas coords (0=right, clockwise positive)
+  const orig=((3*Math.PI/2-angle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+  return Math.floor(orig/arc)%CATS.length;
+}
+
+function screenFlash(col,cb){
+  const f=document.getElementById('flash');
+  f.style.transition='none';
+  f.style.background=col+'55';
+  f.style.opacity='1';
+  setTimeout(()=>{
+    f.style.transition='opacity .4s ease';
+    f.style.opacity='0';
+    setTimeout(cb,380);
+  },400);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  QUESTION
+// ═══════════════════════════════════════════════════════════
+
+function showQ(prefCat){
+  let idx=ST.pool.findIndex(q=>q.c===prefCat);
+  if(idx<0)idx=0;
+  ST.curQ=ST.pool.splice(idx,1)[0];
+  ST.used.push(ST.curQ);
+  ST.qDone++;
+
+  const cat=CATS[ST.curQ.c],pl=ST.players[ST.pIdx];
+
+  // Category banner
+  const cb=document.getElementById('cb');
+  cb.style.color=cat.col;
+  cb.style.borderColor=cat.col;
+  cb.style.background=cat.col+'18';
+  document.getElementById('ci').textContent=cat.ico;
+  document.getElementById('cn').textContent=cat.full;
+
+  // Player info
+  document.getElementById('qp').textContent=`${pl.ico} ${pl.name}`;
+
+  // Question text
+  document.getElementById('qt').textContent=ST.curQ.q;
+
+  // Shuffle options — track where the correct answer lands each time
+  const correctText=ST.curQ.o[ST.curQ.a];
+  ST.shuffledOpts=shuffle([...ST.curQ.o]);
+  ST.displayCorrect=ST.shuffledOpts.indexOf(correctText);
+
+  // Options
+  const og=document.getElementById('og');og.innerHTML='';
+  ['A','B','C','D'].forEach((l,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="ol">${l}</span>${ST.shuffledOpts[i]}`;
+    b.onclick=()=>answer(i);
+    og.appendChild(b);
+  });
+
+  startTimer();
+  go('q');
+  // Scroll to top of question screen
+  document.getElementById('q').scrollTop=0;
+}
+
+function answer(sel){
+  clearTimer();
+  const ok=sel===ST.displayCorrect;
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach(b=>{b.disabled=true;b.onclick=null;});
+  btns[ST.displayCorrect].classList.add('ok');
+  if(!ok)btns[sel].classList.add('no');
+  if(ok){
+    ST.players[ST.pIdx].score+=10;
+    screenFlash('#00e676',()=>{});
+  }else{
+    screenFlash('#ff3344',()=>{});
+    const qs=document.getElementById('q');
+    qs.classList.add('shake');setTimeout(()=>qs.classList.remove('shake'),500);
+  }
+  setTimeout(()=>showFeedback(ok),950);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════════════
+
+const TSEC=30;
+
+function startTimer(){
+  ST.tLeft=TSEC;updateTimer();
+  ST.tInt=setInterval(()=>{
+    ST.tLeft--;updateTimer();
+    if(ST.tLeft<=0){clearTimer();timeUp();}
+  },1000);
+}
+function clearTimer(){ clearInterval(ST.tInt);ST.tInt=null; }
+function updateTimer(){
+  const pct=ST.tLeft/TSEC;
+  const off=CIRC*(1-pct);
+  const tp=document.getElementById('tp'),tv=document.getElementById('tv');
+  tp.style.strokeDashoffset=off;
+  tv.textContent=ST.tLeft;
+  const col=ST.tLeft>15?'#00d4ff':ST.tLeft>8?'#ff8800':'#ff3344';
+  tp.style.stroke=col;tv.style.color=col;
+}
+function timeUp(){
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach(b=>{b.disabled=true;b.onclick=null;});
+  btns[ST.displayCorrect].classList.add('ok');
+  const qs=document.getElementById('q');
+  qs.classList.add('shake');
+  setTimeout(()=>{qs.classList.remove('shake');showFeedback(false,true);},500);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FEEDBACK
+// ═══════════════════════════════════════════════════════════
+
+function showFeedback(ok,timeout=false){
+  const fi=document.getElementById('fi'),ft=document.getElementById('ft');
+  const fpt=document.getElementById('fpt'),fa=document.getElementById('fa');
+  const fe=document.getElementById('fe');
+
+  if(timeout){
+    fi.textContent='⏰';ft.className='ftit kno';ft.textContent='¡TIEMPO!';fpt.textContent='';
+  }else if(ok){
+    fi.textContent='⚡';ft.className='ftit kok';ft.textContent='¡CORRECTO!';fpt.textContent='+10 puntos';
+  }else{
+    fi.textContent='❌';ft.className='ftit kno';ft.textContent='¡INCORRECTO!';fpt.textContent='';
+  }
+
+  if(!ok){
+    fa.style.display='block';
+    fa.innerHTML=`<strong>✅ Respuesta correcta:</strong><br>${ST.shuffledOpts[ST.displayCorrect]}`;
+  }else{fa.style.display='none';}
+
+  fe.textContent=ST.curQ.e;
+  go('f');
+  document.getElementById('f').scrollTop=0;
+}
+
+function nextTurn(){
+  updateSB();
+  if(ST.pool.length===0){gameOver();return;}
+  ST.pIdx=(ST.pIdx+1)%ST.players.length;
+  updateTI();updateRC();
+  document.getElementById('spinbtn').disabled=false;
+  go('wh');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════════════════
+
+function updateSB(){
+  const c=document.getElementById('sb');c.innerHTML='';
+  ST.players.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='schip'+(i===ST.pIdx?' act':'');
+    d.innerHTML=`<div class="sn">${p.ico} ${p.name.substring(0,7)}</div><div class="sp2">${p.score}</div>`;
+    c.appendChild(d);
+  });
+}
+function updateTI(){
+  const p=ST.players[ST.pIdx];
+  document.getElementById('ti').textContent=`${p.ico} Turno de ${p.name}`;
+}
+function updateRC(){
+  document.getElementById('rc').textContent=`PREGUNTA ${ST.qDone+1} / ${ST.qTotal}`;
+}
+function buildCatLegend(){
+  const cl=document.getElementById('cl');cl.innerHTML='';
+  CATS.forEach(cat=>{
+    const d=document.createElement('div');
+    d.className='cl-chip';
+    d.style.background=cat.col+'1A';
+    d.style.borderColor=cat.col+'44';
+    d.style.color=cat.col;
+    d.textContent=`${cat.ico} ${cat.short}`;
+    cl.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GAME OVER
+// ═══════════════════════════════════════════════════════════
+
+function gameOver(){
+  // Mark used questions as seen
+  markSeen(ST.used);
+
+  const sorted=[...ST.players].sort((a,b)=>b.score-a.score);
+  const gs=document.getElementById('gs');
+  const maxPts=ST.qTotal*10;
+
+  if(ST.nPl===1){
+    const pct=Math.round((sorted[0].score/maxPts)*100);
+    gs.textContent=`${sorted[0].ico} ${sorted[0].name}: ${sorted[0].score}/${maxPts} pts · ${pct}% de aciertos`;
+  }else{
+    const tied=sorted.filter(p=>p.score===sorted[0].score);
+    gs.textContent=tied.length>1
+      ?`¡Empate! ${tied.map(p=>`${p.ico}${p.name}`).join(' y ')}`
+      :`¡Felicidades ${sorted[0].ico} ${sorted[0].name} por la victoria!`;
+  }
+
+  const fs=document.getElementById('fs');fs.innerHTML='';
+  const emos=['🥇','🥈','🥉','4️⃣'];
+  const rcs=['fg','fs','fb',''];
+  sorted.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='frow'+(i===0?' win':'');
+    d.innerHTML=`<div class="frank ${rcs[i]||''}">${emos[i]}</div>
+      <div style="font-size:1.1rem;flex-shrink:0">${p.ico}</div>
+      <div class="fname" style="color:${p.col}">${p.name}</div>
+      <div class="fpts2">${p.score} pts</div>`;
+    fs.appendChild(d);
+  });
+
+  // Show remaining unseen count
+  const rem=unseenCount();
+  if(rem>0){
+    const note=document.createElement('div');
+    note.style.cssText='font-size:.8rem;color:var(--dim);text-align:center;padding:6px 0';
+    note.textContent=`📚 Quedan ${rem} preguntas nuevas para la próxima partida`;
+    fs.appendChild(note);
+  }
+
+  go('go');
+}
+
+function restart(){ updateSeenInfo(); go('s'); }
+
+// ═══════════════════════════════════════════════════════════
+//  PARTICLE BACKGROUND
+// ═══════════════════════════════════════════════════════════
+
+(function initBg(){
+  const cv=document.getElementById('bg');
+  const ctx=cv.getContext('2d');
+  function resize(){ cv.width=window.innerWidth; cv.height=window.innerHeight; }
+  resize(); window.addEventListener('resize',resize);
+  const pts=Array.from({length:40},()=>({
+    x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+    vx:(Math.random()-.5)*.38, vy:(Math.random()-.5)*.38,
+    r:Math.random()*1.7+.3, a:Math.random()*.55+.1,
+    col:Math.random()>.65?'#FFD700':'#00D4FF', ph:Math.random()*Math.PI*2,
+  }));
+  function frame(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // Subtle circuit grid
+    ctx.strokeStyle='rgba(0,212,255,.022)';ctx.lineWidth=1;
+    for(let x=0;x<cv.width;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+    for(let y=0;y<cv.height;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+    pts.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.ph+=.012;
+      if(p.x<0||p.x>cv.width)p.vx*=-1;
+      if(p.y<0||p.y>cv.height)p.vy*=-1;
+      const a=p.a*(.45+.55*Math.sin(p.ph));
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+      ctx.fillStyle=p.col+Math.round(a*255).toString(16).padStart(2,'0');
+      ctx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════════════════════════════
+
+function shuffle(a){
+  const r=[...a];
+  for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]; }
+  return r;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+
+selN(1);
+updateSeenInfo();
+setTimeout(()=>drawWheel(0),100);
+</script>
+</body>
+</html>
